@@ -58,8 +58,8 @@ function Get-TargetResource
 
     return @{
         IsSingleInstance = 'Yes'
-        EnableLmHosts    = $enableLmHosts
-        EnableDns        = $enableDns
+        EnableLmHosts = $enableLmHosts
+        EnableDns = $enableDns
     }
 } # Get-TargetResource
 
@@ -120,7 +120,7 @@ function Set-TargetResource
         -MethodName EnableWins `
         -Arguments @{
             DNSEnabledForWINSResolution = $EnableDns
-            WINSEnableLMHostsLookup     = $EnableLmHosts
+            WINSEnableLMHostsLookup = $EnableLmHosts
         }
 
     if ($result.ReturnValue -ne 0)

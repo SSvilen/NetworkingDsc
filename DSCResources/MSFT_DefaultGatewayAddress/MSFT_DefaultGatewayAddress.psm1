@@ -48,28 +48,39 @@ function Get-TargetResource
 
     # Use $AddressFamily to select the IPv4 or IPv6 destination prefix
     $destinationPrefix = '0.0.0.0/0'
+
     if ($AddressFamily -eq 'IPv6')
     {
         $destinationPrefix = '::/0'
     }
+
     # Get all the default routes
     $defaultRoutes = Get-NetRoute -InterfaceAlias $InterfaceAlias -AddressFamily `
         $AddressFamily -ErrorAction Stop | `
-        Where-Object { $_.DestinationPrefix -eq $destinationPrefix }
+        Where-Object -FilterScript {
+            $_.DestinationPrefix -eq $destinationPrefix
+        }
 
     $returnValue = @{
         AddressFamily  = $AddressFamily
         InterfaceAlias = $InterfaceAlias
     }
-    # If there is a Default Gateway defined for this interface/address family add it
-    # to the return value.
+
+    <#
+        If there is a Default Gateway defined for this interface/address family add it
+        to the return value.
+    #>
     if ($defaultRoutes)
     {
-        $returnValue += @{ Address = $defaultRoutes.NextHop }
+        $returnValue += @{
+            Address = $defaultRoutes.NextHop
+        }
     }
     else
     {
-        $returnValue += @{ Address = $null }
+        $returnValue += @{
+            Address = $null
+        }
     }
 
     $returnValue
@@ -124,7 +135,9 @@ function Set-TargetResource
     $defaultRoutes = @(Get-NetRoute `
             -InterfaceAlias $InterfaceAlias `
             -AddressFamily $AddressFamily `
-            -ErrorAction Stop).Where( { $_.DestinationPrefix -eq $destinationPrefix } )
+            -ErrorAction Stop).Where( {
+                $_.DestinationPrefix -eq $destinationPrefix
+            } )
 
     # Remove any existing default route
     foreach ($defaultRoute in $defaultRoutes)
@@ -139,8 +152,10 @@ function Set-TargetResource
 
     if ($Address)
     {
-        # Set the correct Default Route
-        # Build parameter hash table
+        <#
+            Set the correct Default Route
+            Build parameter hash table
+        #>
         $parameters = @{
             DestinationPrefix = $destinationPrefix
             InterfaceAlias    = $InterfaceAlias
@@ -197,7 +212,7 @@ function Test-TargetResource
     )
 
     # Flag to signal whether settings are correct
-    [Boolean] $desiredConfigurationMatch = $true
+    $desiredConfigurationMatch = $true
 
     Write-Verbose -Message ( @("$($MyInvocation.MyCommand): "
             $($script:localizedData.CheckingDefaultGatewayAddressMessage)
@@ -207,6 +222,7 @@ function Test-TargetResource
 
     # Use $AddressFamily to select the IPv4 or IPv6 destination prefix
     $destinationPrefix = '0.0.0.0/0'
+
     if ($AddressFamily -eq 'IPv6')
     {
         $destinationPrefix = '::/0'
@@ -216,14 +232,18 @@ function Test-TargetResource
     $defaultRoutes = @(Get-NetRoute `
             -InterfaceAlias $InterfaceAlias `
             -AddressFamily $AddressFamily `
-            -ErrorAction Stop).Where( { $_.DestinationPrefix -eq $destinationPrefix } )
+            -ErrorAction Stop).Where( {
+                $_.DestinationPrefix -eq $destinationPrefix
+            } )
 
     # Test if the Default Gateway passed is equal to the current default gateway
     if ($Address)
     {
         if ($defaultRoutes)
         {
-            if (-not $defaultRoutes.Where( { $_.NextHop -eq $Address } ))
+            if (-not $defaultRoutes.Where( {
+                $_.NextHop -eq $Address
+            } ))
             {
                 Write-Verbose -Message ( @("$($MyInvocation.MyCommand): "
                         $($script:localizedData.DefaultGatewayNotMatchMessage) -f $Address, $defaultRoutes.NextHop
