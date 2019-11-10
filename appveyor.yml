@@ -6,7 +6,7 @@ environment:
   gallery_api:
     secure: 9ekJzfsPCDBkyLrfmov83XbbhZ6E2N3z+B/Io8NbDetbHc6hWS19zsDmy7t0Vvxv
 install:
-    - git clone https://github.com/PowerShell/DscResource.Tests
+    - git clone https://github.com/SSvilen/DscResource.Tests -b HashtableCheck
 
     - ps: |
         $moduleName = 'NetworkingDsc'
